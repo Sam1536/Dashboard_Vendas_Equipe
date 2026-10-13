@@ -1,0 +1,21 @@
+model Model
+	culture: pt-BR
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: pt-BR
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation PBI_QueryOrder = ["Base Vendas","_Medidas"]
+
+annotation __PBI_TimeIntelligenceEnabled = 1
+
+annotation PBI_ProTooling = ["DevMode"]
+
+ref table 'Base Vendas'
+ref table DateTableTemplate_43c33e2e-d2d3-4fb5-bd09-804d11a8e92a
+ref table LocalDateTable_42b61e5b-a685-4160-9ebb-a632cceafdb6
+ref table _Medidas
+
+ref cultureInfo pt-BR
+

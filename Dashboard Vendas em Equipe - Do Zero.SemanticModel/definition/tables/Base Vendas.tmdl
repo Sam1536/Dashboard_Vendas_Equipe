@@ -1,0 +1,119 @@
+table 'Base Vendas'
+	lineageTag: ff0e4eb7-bb02-4400-9608-943f7bdaa260
+
+	column Data
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 8df4e7af-eb73-4408-b3a3-c402b9d36fdf
+		summarizeBy: none
+		sourceColumn: Data
+
+		variation Variation
+			isDefault
+			relationship: 76a48d23-b1bd-4a0e-8180-b3109212e486
+			defaultHierarchy: LocalDateTable_42b61e5b-a685-4160-9ebb-a632cceafdb6.'Hierarquia de datas'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'Nome do Vendedor'
+		dataType: string
+		lineageTag: ec007598-5b9f-4c7f-9f80-7935249c0526
+		summarizeBy: none
+		sourceColumn: Nome do Vendedor
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'CPF do Vendedor'
+		dataType: int64
+		formatString: 0
+		lineageTag: d0eed1fc-b7a6-487f-93a9-dd253e5b9f02
+		summarizeBy: sum
+		sourceColumn: CPF do Vendedor
+
+		annotation SummarizationSetBy = Automatic
+
+	column Produto
+		dataType: string
+		lineageTag: 34bf1ca9-bddf-4a9b-96a9-dff4584fe6ab
+		summarizeBy: none
+		sourceColumn: Produto
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Valor Unitario'
+		dataType: int64
+		formatString: 0
+		lineageTag: 1b9c596c-7438-46b8-8290-041217b1aec7
+		summarizeBy: sum
+		sourceColumn: Valor Unitario
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Quantidade Vendida'
+		dataType: int64
+		formatString: 0
+		lineageTag: 6db589da-91ca-4a28-bdd1-a9685f3bb044
+		summarizeBy: sum
+		sourceColumn: Quantidade Vendida
+
+		annotation SummarizationSetBy = Automatic
+
+	column Faturamento
+		dataType: int64
+		formatString: 0
+		lineageTag: c2f5acf8-898a-4706-bc57-05039f0d8e0d
+		summarizeBy: sum
+		sourceColumn: Faturamento
+
+		annotation SummarizationSetBy = Automatic
+
+	column Lucro
+		dataType: int64
+		formatString: 0
+		lineageTag: 41e1fa82-2ad0-43bc-8c14-445768e8f0d4
+		summarizeBy: sum
+		sourceColumn: Lucro
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Forma de Pagamento'
+		dataType: string
+		lineageTag: b097ca5f-69bc-474d-b002-55383bb58bf0
+		summarizeBy: none
+		sourceColumn: Forma de Pagamento
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Imagem Vendedor'
+		dataType: string
+		lineageTag: 4d21687f-e1c8-438c-893c-596f337aa379
+		dataCategory: ImageUrl
+		summarizeBy: none
+		sourceColumn: Imagem Vendedor
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Base Vendas' = m
+		mode: import
+		source =
+				let
+				    Fonte = Excel.Workbook(File.Contents("C:\Users\a-agn\Documents\PoweBi Exercícios e Outros\PowerBI_Impressionador_Hashtag_2023 Materia\Importação e Tratamento de BD-Power Query\Lives Dashboards\Power BI - Dashboard Vendas em Equipe\Vendas Equipe.xlsx"), null, true),
+				    Base_Sheet = Fonte{[Item="Base",Kind="Sheet"]}[Data],
+				    #"Cabeçalhos Promovidos" = Table.PromoteHeaders(Base_Sheet, [PromoteAllScalars=true]),
+				    #"Tipo Alterado" = Table.TransformColumnTypes(#"Cabeçalhos Promovidos",{{"Data", type date}, {"Vendedor", type text}, {"Produto", type text}, {"Valor Unitario", Int64.Type}, {"Quantidade Vendida", Int64.Type}, {"Faturamento", Int64.Type}, {"Lucro", Int64.Type}, {"Forma de Pagamento", type text}, {"Imagem Vendedor", type text}, {"Column10", type any}}),
+				    #"Colunas Removidas" = Table.RemoveColumns(#"Tipo Alterado",{"Column10"}),
+				    #"Dividir Coluna por Delimitador" = Table.SplitColumn(#"Colunas Removidas", "Vendedor", Splitter.SplitTextByDelimiter(" - ", QuoteStyle.Csv), {"Vendedor.1", "Vendedor.2"}),
+				    #"Tipo Alterado2" = Table.TransformColumnTypes(#"Dividir Coluna por Delimitador",{{"Vendedor.2", Int64.Type}}),
+				    #"Colunas Renomeadas" = Table.RenameColumns(#"Tipo Alterado2",{{"Vendedor.1", "Nome do Vendedor"}, {"Vendedor.2", "CPF do Vendedor"}}),
+				    #"Tipo Alterado1" = Table.TransformColumnTypes(#"Colunas Renomeadas",{{"Nome do Vendedor", type text}, {"CPF do Vendedor", Int64.Type}}),
+				    #"Linhas em Branco Removidas" = Table.SelectRows(#"Tipo Alterado1", each not List.IsEmpty(List.RemoveMatchingItems(Record.FieldValues(_), {"", null}))),
+				    #"Valor Substituído" = Table.ReplaceValue(#"Linhas em Branco Removidas","uc?id=","thumbnail?id=",Replacer.ReplaceText,{"Imagem Vendedor"})
+				in
+				    #"Valor Substituído"
+
+	annotation PBI_NavigationStepName = Navegação
+
+	annotation PBI_ResultType = Table
+

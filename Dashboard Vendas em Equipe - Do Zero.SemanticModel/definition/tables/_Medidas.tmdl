@@ -1,0 +1,31 @@
+table _Medidas
+	lineageTag: 776124c9-3213-473a-9e44-0a2f1676f6f3
+
+	measure 'Total Faturamento' = SUM('Base Vendas'[Faturamento])
+		formatString: "R$"\ #,0.00;-"R$"\ #,0.00;"R$"\ #,0.00
+		lineageTag: f562d291-7432-4532-bedc-58668e28d69b
+
+		annotation PBI_FormatHint = {"currencyCulture":"pt-BR"}
+
+	measure 'Total Lucro' = SUM('Base Vendas'[Lucro])
+		formatString: "R$"\ #,0.00;-"R$"\ #,0.00;"R$"\ #,0.00
+		lineageTag: 6ee2614b-2610-4d5b-9e4b-93373b47af17
+
+		annotation PBI_FormatHint = {"currencyCulture":"pt-BR"}
+
+	measure 'Qtd Vendida' = SUM('Base Vendas'[Quantidade Vendida])
+		formatString: 0
+		lineageTag: 2c2051e3-d1c9-4fc2-bc54-61b5be70a53c
+
+	partition _Medidas = m
+		mode: import
+		source =
+				let
+				    Fonte = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i44FAA==", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [#"Coluna 1" = _t]),
+				    #"Tipo Alterado" = Table.TransformColumnTypes(Fonte,{{"Coluna 1", type text}}),
+				    #"Colunas Removidas" = Table.RemoveColumns(#"Tipo Alterado",{"Coluna 1"})
+				in
+				    #"Colunas Removidas"
+
+	annotation PBI_ResultType = Table
+
